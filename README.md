@@ -1,15 +1,18 @@
 # Controle de Gastos
 
-App web pessoal (PWA) para controlar gastos separando o que foi pago no **meu
-cartão** do que foi pago no **cartão da mãe**, incluindo as assinaturas
-recorrentes (Game Pass, Claude, YouTube Premium, Spotify).
+App web pessoal (PWA) para acompanhar compras no **meu cartão** e no **cartão
+da mãe**: compras à vista, assinaturas mensais e compras parceladas.
 
 React + Vite · Tailwind CSS · Supabase (Postgres + Auth) · deploy na Vercel.
 
 ## O que ele faz
 
-- Formulário rápido de novo gasto: descrição, valor, categoria, cartão, data e
-  se é recorrente.
+- Formulário rápido de lançamento com escolha entre compra à vista, assinatura
+  mensal ou compra parcelada, sempre indicando qual cartão foi usado.
+- Compras parceladas criam automaticamente todas as faturas, mostram `1/12`,
+  `2/12` etc. e informam o mês da última parcela antes de salvar.
+- Assinaturas aparecem automaticamente em cada mês a partir da primeira
+  cobrança, sem precisar lançar a fatura manualmente.
 - Lista de lançamentos com filtro por quem pagou e por categoria.
 - **Dois totais separados**, o meu e o do cartão da mãe, com a fatia de cada um.
 - Seção de assinaturas, com o total mensal comprometido em cada cartão e um
@@ -75,9 +78,9 @@ Início**. O ícone e o nome já vêm do `manifest.webmanifest`.
 
 ## Banco de dados
 
-O schema está em `supabase/migrations/0001_gastos_e_assinaturas.sql` e já foi
-aplicado no projeto. Duas tabelas, `gastos` e `assinaturas`, ambas com RLS
-ligado. Mudanças de schema entram como um arquivo novo em `supabase/migrations/`,
+O schema está em `supabase/migrations/`. As migrations `0001` (base) e `0002`
+(tipos e parcelas) precisam estar aplicadas no projeto. As tabelas `gastos` e
+`assinaturas` têm RLS ligado. Mudanças de schema entram como um arquivo novo,
 nunca editando uma migration já aplicada.
 
 ## Estrutura

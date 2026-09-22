@@ -37,13 +37,12 @@ function ItemGasto({ gasto, aoRemover }) {
           </time>
           <span aria-hidden="true">·</span>
           <span>{cartao.curto}</span>
+          {gasto.tipo === 'assinatura' && <Etiqueta texto="assinatura" />}
+          {gasto.tipo === 'parcelado' && (
+            <Etiqueta texto={`${gasto.parcela_numero}/${gasto.total_parcelas}`} />
+          )}
           {gasto.recorrente && (
-            <span
-              className="shrink-0 rounded px-1 py-px text-[10px] uppercase tracking-wide text-texto-fraco ring-1 ring-borda"
-              title="Despesa recorrente"
-            >
-              fixo
-            </span>
+            <Etiqueta texto="fixo" />
           )}
         </p>
       </div>
@@ -61,5 +60,13 @@ function ItemGasto({ gasto, aoRemover }) {
         ×
       </button>
     </li>
+  )
+}
+
+function Etiqueta({ texto }) {
+  return (
+    <span className="shrink-0 rounded px-1 py-px text-[10px] uppercase tracking-wide text-texto-fraco ring-1 ring-borda">
+      {texto}
+    </span>
   )
 }

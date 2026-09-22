@@ -54,6 +54,15 @@ export function competenciaAtual() {
   return hojeIso().slice(0, 7)
 }
 
+/** Soma meses a uma data sem deixar o dia escapar para o mes seguinte. */
+export function adicionarMeses(iso, quantidade) {
+  const [ano, mes, dia] = iso.split('-').map(Number)
+  const destino = new Date(ano, mes - 1 + quantidade, 1)
+  const ultimoDia = new Date(destino.getFullYear(), destino.getMonth() + 1, 0).getDate()
+  const diaAjustado = String(Math.min(dia, ultimoDia)).padStart(2, '0')
+  return `${destino.getFullYear()}-${String(destino.getMonth() + 1).padStart(2, '0')}-${diaAjustado}`
+}
+
 /**
  * Converte o texto digitado no campo de valor para numero.
  * Aceita tanto '12,50' quanto '12.50', porque o teclado do iPhone oferece virgula.

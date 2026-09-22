@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { hojeIso } from '../lib/formato'
 
 /** Assinaturas recorrentes: Game Pass, Claude, YouTube Premium, Spotify... */
 export function useAssinaturas(usuarioId) {
@@ -40,7 +41,7 @@ export function useAssinaturas(usuarioId) {
   async function alternarAtiva(assinatura) {
     const { error } = await supabase
       .from('assinaturas')
-      .update({ ativa: !assinatura.ativa })
+      .update({ ativa: !assinatura.ativa, data_fim: assinatura.ativa ? hojeIso() : null })
       .eq('id', assinatura.id)
     if (error) return { erro: error.message }
     await recarregar()

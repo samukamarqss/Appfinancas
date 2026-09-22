@@ -39,6 +39,15 @@ export function useGastos(usuarioId) {
     return {}
   }
 
+  async function adicionarVarios(novosGastos) {
+    const { error } = await supabase
+      .from('gastos')
+      .insert(novosGastos.map((gasto) => ({ ...gasto, usuario_id: usuarioId })))
+    if (error) return { erro: error.message }
+    await recarregar()
+    return {}
+  }
+
   async function remover(id) {
     const { error } = await supabase.from('gastos').delete().eq('id', id)
     if (error) return { erro: error.message }
@@ -46,5 +55,5 @@ export function useGastos(usuarioId) {
     return {}
   }
 
-  return { gastos, carregando, erro, adicionar, remover, recarregar }
+  return { gastos, carregando, erro, adicionar, adicionarVarios, remover, recarregar }
 }

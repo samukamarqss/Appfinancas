@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { ASSINATURAS_SUGERIDAS, LISTA_CARTOES } from '../lib/constantes'
-import { valorParaNumero } from '../lib/formato'
+import { hojeIso, valorParaNumero } from '../lib/formato'
 import { Botao } from './Botao'
 import { CampoTexto } from './Campo'
 import { Aviso } from './Secao'
 import { SeletorCartao } from './SeletorCartao'
 
-const VAZIO = { nome: '', valor_mensal: '', cartao: 'meu', dia_cobranca: '' }
+const VAZIO = { nome: '', valor_mensal: '', cartao: 'meu', data_inicio: hojeIso() }
 
 export function FormularioAssinatura({ aoSalvar, aoConcluir }) {
   const [form, setForm] = useState(VAZIO)
@@ -25,12 +25,6 @@ export function FormularioAssinatura({ aoSalvar, aoConcluir }) {
       return
     }
 
-    const dia = form.dia_cobranca === '' ? null : Number(form.dia_cobranca)
-    if (dia !== null && (!Number.isInteger(dia) || dia < 1 || dia > 31)) {
-      setErro('O dia da cobrança precisa estar entre 1 e 31.')
-      return
-    }
-
     setErro(null)
     setSalvando(true)
     const { erro: falha } = await aoSalvar({
@@ -38,7 +32,8 @@ export function FormularioAssinatura({ aoSalvar, aoConcluir }) {
       valor_mensal: valor,
       cartao: form.cartao,
       categoria: 'Assinaturas',
-      dia_cobranca: dia,
+      dia_cobranca: Number(form.data_inicio.slice(8, 10)),
+      data_inicio: form.data_inicio,
     })
     setSalvando(false)
 
@@ -86,14 +81,11 @@ export function FormularioAssinatura({ aoSalvar, aoConcluir }) {
           onChange={(e) => alterar('valor_mensal', e.target.value)}
         />
         <CampoTexto
-          rotulo="Dia da cobrança"
-          type="number"
-          inputMode="numeric"
-          min={1}
-          max={31}
-          placeholder="Opcional"
-          value={form.dia_cobranca}
-          onChange={(e) => alterar('dia_cobranca', e.target.value)}
+          rotulo="Primeira cobrança"
+          type="date"
+          required
+          value={form.data_inicio}
+          onChange={(e) => alterar('data_inicio', e.target.value)}
         />
       </div>
 

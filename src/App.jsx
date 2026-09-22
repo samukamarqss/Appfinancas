@@ -5,9 +5,10 @@ import {
   competenciasDisponiveis,
   filtrarPorCartaoECategoria,
   filtrarPorCompetencia,
+  incluirAssinaturasNosGastos,
   totalPorCartao,
 } from './lib/agregacoes'
-import { competenciaAtual, hojeIso } from './lib/formato'
+import { competenciaAtual } from './lib/formato'
 import { useAssinaturas } from './hooks/useAssinaturas'
 import { useAuth } from './hooks/useAuth'
 import { useGastos } from './hooks/useGastos'
@@ -51,7 +52,10 @@ function AppLogado({ usuario, aoSair }) {
   const [filtros, setFiltros] = useState({ cartao: 'todos', categoria: 'todas' })
   const [modal, setModal] = useState(null)
 
-  const { gastos } = gastosApi
+  const gastos = useMemo(
+    () => incluirAssinaturasNosGastos(gastosApi.gastos, assinaturasApi.assinaturas),
+    [gastosApi.gastos, assinaturasApi.assinaturas],
+  )
 
   const meses = useMemo(() => competenciasDisponiveis(gastos), [gastos])
   const doMes = useMemo(() => filtrarPorCompetencia(gastos, mes), [gastos, mes])
@@ -65,26 +69,13 @@ function AppLogado({ usuario, aoSair }) {
   // O mes corrente aparece no seletor mesmo antes do primeiro lancamento.
   const mesesDoSeletor = meses.includes(mes) || mes === 'todos' ? meses : [mes, ...meses]
 
-  /** Cria o lancamento do mes a partir de uma assinatura, ja ligado a ela. */
-  async function lancarAssinatura(assinatura) {
-    const hoje = hojeIso()
-    const dia = assinatura.dia_cobranca
-      ? String(assinatura.dia_cobranca).padStart(2, '0')
-      : hoje.slice(8, 10)
-
-    const { erro } = await gastosApi.adicionar({
-      descricao: assinatura.nome,
-      valor: assinatura.valor_mensal,
-      categoria: assinatura.categoria ?? 'Assinaturas',
-      cartao: assinatura.cartao,
-      data: `${hoje.slice(0, 7)}-${dia}`,
-      recorrente: true,
-      assinatura_id: assinatura.id,
-    })
-    if (erro) window.alert(`Não deu para lançar: ${erro}`)
-  }
-
   async function removerGasto(gasto) {
+    if (gasto.assinatura_virtual) {
+      if (!window.confirm(`Remover a assinatura \"${gasto.descricao}\"? Ela deixará de aparecer em todos os meses.`)) return
+      const { erro } = await assinaturasApi.remover(gasto.assinatura_id)
+      if (erro) window.alert(`Não deu para remover: ${erro}`)
+      return
+    }
     if (!window.confirm(`Remover "${gasto.descricao}"?`)) return
     const { erro } = await gastosApi.remover(gasto.id)
     if (erro) window.alert(`Não deu para remover: ${erro}`)
@@ -129,7 +120,6 @@ function AppLogado({ usuario, aoSair }) {
               assinaturas={assinaturasApi.assinaturas}
               aoAlternar={assinaturasApi.alternarAtiva}
               aoRemover={removerAssinatura}
-              aoLancarGasto={lancarAssinatura}
             />
           </Secao>
         )}
@@ -159,8 +149,13 @@ function AppLogado({ usuario, aoSair }) {
 
       <NavegacaoAbas abaAtiva={aba} aoTrocar={setAba} />
 
-      <Modal titulo="Novo gasto" aberto={modal === 'gasto'} aoFechar={() => setModal(null)}>
-        <FormularioGasto aoSalvar={gastosApi.adicionar} aoConcluir={() => setModal(null)} />
+      <Modal titulo="Novo lançamento" aberto={modal === 'gasto'} aoFechar={() => setModal(null)}>
+        <FormularioGasto
+          aoSalvar={gastosApi.adicionar}
+          aoSalvarParcelas={gastosApi.adicionarVarios}
+          aoCriarAssinatura={assinaturasApi.adicionar}
+          aoConcluir={() => setModal(null)}
+        />
       </Modal>
 
       <Modal

@@ -9,7 +9,7 @@ via Vercel. Instalavel como PWA na tela de inicio do iPhone.
 
 ## Escopo da primeira versao
 
-- Cadastro de gastos com descricao, valor, categoria, cartao usado, data e recorrencia.
+- Cadastro de compras a vista, assinaturas mensais e compras parceladas, com descricao, valor, categoria, cartao e data.
 - Listagem de gastos com filtros por cartao e categoria.
 - Totais separados por cartao.
 - Secao de assinaturas recorrentes.
@@ -66,8 +66,14 @@ Regras:
 ## Modelo de dados
 
 `assinaturas` — servico recorrente (Game Pass, Claude, YouTube Premium, Spotify...).
-`gastos` — lancamento individual; `assinatura_id` liga um lancamento a assinatura
-que o originou, e e nulo para compras avulsas.
+`gastos` — lancamento individual. Compras parceladas geram um lancamento por
+fatura, ligados por `grupo_parcelas` e identificados por `parcela_numero`/
+`total_parcelas`. `assinatura_id` preserva a compatibilidade com lancamentos
+manuais antigos de uma assinatura.
+
+Assinaturas sao materializadas na interface a partir de `data_inicio`, uma vez
+por mes ate a competencia atual (ou `data_fim`, se pausadas); nao dependem de
+um cron ou de um botao mensal.
 
 Ambas as tabelas tem `usuario_id` com RLS ligado e policy `auth.uid() = usuario_id`.
 Toda tabela nova neste projeto deve seguir o mesmo padrao.

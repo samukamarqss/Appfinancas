@@ -2,7 +2,7 @@
 // testaveis isoladamente e para o App nao virar um amontoado de reduce.
 
 import { CATEGORIAS } from './constantes'
-import { competencia, formatarCompetencia } from './formato'
+import { adicionarMeses, competencia, competenciaAtual, formatarCompetencia } from './formato'
 
 /** Os meses que tem lancamento, do mais recente para o mais antigo. */
 export function competenciasDisponiveis(gastos) {
@@ -72,4 +72,45 @@ export function agruparPorMes(gastos, limite = 6) {
     }))
     .sort((a, b) => a.chave.localeCompare(b.chave))
     .slice(-limite)
+}
+
+/**
+ * Materializa assinaturas para a tela sem precisar de cron no servidor.
+ * Cada competencia, do inicio ate o mes atual, recebe uma cobranca virtual.
+ */
+export function incluirAssinaturasNosGastos(gastos, assinaturas) {
+  const competenciasJaLancadas = new Set(
+    gastos.filter((gasto) => gasto.assinatura_id).map((gasto) => `${gasto.assinatura_id}:${competencia(gasto.data)}`),
+  )
+  const limite = competenciaAtual()
+  const virtuais = []
+
+  for (const assinatura of assinaturas) {
+    const inicio = assinatura.data_inicio ?? `${limite}-01`
+    const limiteAssinatura = assinatura.ativa ? limite : assinatura.data_fim?.slice(0, 7)
+    if (!limiteAssinatura) continue
+    let indice = 0
+    let data = inicio
+    while (competencia(data) <= limiteAssinatura) {
+      const chave = `${assinatura.id}:${competencia(data)}`
+      if (!competenciasJaLancadas.has(chave)) {
+        virtuais.push({
+          id: `assinatura-${chave}`,
+          assinatura_id: assinatura.id,
+          descricao: assinatura.nome,
+          valor: assinatura.valor_mensal,
+          categoria: assinatura.categoria ?? 'Assinaturas',
+          cartao: assinatura.cartao,
+          data,
+          recorrente: true,
+          tipo: 'assinatura',
+          assinatura_virtual: true,
+        })
+      }
+      indice += 1
+      data = adicionarMeses(inicio, indice)
+    }
+  }
+
+  return [...gastos, ...virtuais]
 }

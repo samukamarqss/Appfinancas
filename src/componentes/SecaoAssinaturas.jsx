@@ -7,7 +7,7 @@ import { EstadoVazio } from './Secao'
  * Assinaturas recorrentes, com o total mensal comprometido em cada cartao.
  * E o numero que responde "quanto sai todo mes sem eu fazer nada".
  */
-export function SecaoAssinaturas({ assinaturas, aoAlternar, aoRemover, aoLancarGasto }) {
+export function SecaoAssinaturas({ assinaturas, aoAlternar, aoRemover }) {
   const ativas = assinaturas.filter((a) => a.ativa)
   const mensalPorCartao = {
     meu: somar(ativas.filter((a) => a.cartao === 'meu')),
@@ -44,7 +44,6 @@ export function SecaoAssinaturas({ assinaturas, aoAlternar, aoRemover, aoLancarG
               assinatura={assinatura}
               aoAlternar={aoAlternar}
               aoRemover={aoRemover}
-              aoLancarGasto={aoLancarGasto}
             />
           ))}
         </ul>
@@ -53,7 +52,7 @@ export function SecaoAssinaturas({ assinaturas, aoAlternar, aoRemover, aoLancarG
   )
 }
 
-function ItemAssinatura({ assinatura, aoAlternar, aoRemover, aoLancarGasto }) {
+function ItemAssinatura({ assinatura, aoAlternar, aoRemover }) {
   const cartao = CARTOES[assinatura.cartao]
 
   return (
@@ -82,14 +81,6 @@ function ItemAssinatura({ assinatura, aoAlternar, aoRemover, aoLancarGasto }) {
       </div>
 
       <div className="mt-2.5 flex items-center gap-2 border-t border-borda pt-2.5">
-        <Botao
-          variante="secundario"
-          tamanho="pequeno"
-          disabled={!assinatura.ativa}
-          onClick={() => aoLancarGasto(assinatura)}
-        >
-          Lançar este mês
-        </Botao>
         <Botao variante="fantasma" tamanho="pequeno" onClick={() => aoAlternar(assinatura)}>
           {assinatura.ativa ? 'Pausar' : 'Reativar'}
         </Botao>
