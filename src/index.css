@@ -1,0 +1,68 @@
+@import 'tailwindcss';
+
+/* Dark mode e o tema padrao e unico do app, entao a paleta escura mora aqui
+   nos tokens e nao existe variante `dark:` espalhada pelos componentes. */
+@theme {
+  --color-fundo: #0b1120;
+  --color-superficie: #131c2e;
+  --color-superficie-alta: #1b2740;
+  --color-borda: #26324d;
+  --color-texto: #e8edf7;
+  --color-texto-suave: #94a3b8;
+  --color-texto-fraco: #64748b;
+
+  /* Cores de serie dos graficos. Estes dois passos passaram no validador de
+     paleta contra a superficie #131c2e: banda de luminosidade, piso de croma,
+     separacao para daltonismo e contraste. Nao troque sem revalidar. */
+  --color-meu: #12ab84;
+  --color-mae: #9061f0;
+
+  /* Passos mais claros das mesmas matizes, para texto sobre o fundo escuro,
+     onde o criterio e legibilidade e nao contraste de marca no grafico. */
+  --color-meu-texto: #34d399;
+  --color-mae-texto: #a78bfa;
+
+  --color-perigo: #f87171;
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+html {
+  background-color: var(--color-fundo);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-fundo);
+  color: var(--color-texto);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  /* Respeita o notch e a barra inferior do iPhone em modo standalone. */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  overscroll-behavior-y: none;
+}
+
+/* O iOS da zoom no campo quando a fonte e menor que 16px. */
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+  font-size: 16px;
+}
+
+/* Esconde as setinhas do input number: o teclado decimal ja resolve no iPhone. */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+::selection {
+  background: var(--color-mae-texto);
+  color: var(--color-fundo);
+}
